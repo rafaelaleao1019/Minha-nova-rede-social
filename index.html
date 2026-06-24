@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RafaFace - Conectando corações</title>
+    <style>
+        :root {
+            --primary-pink: #ff69b4;
+            --dark-pink: #e05297;
+            --light-pink: #ffe4f1;
+            --fb-bg: #f0f2f5;
+            --white: #ffffff;
+            --text-main: #1c1e21;
+            --text-sub: #65676b;
+            --hover-bg: #e4e6e9;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: Helvetica, Arial, sans-serif;
+        }
+
+        body {
+            background-color: var(--fb-bg);
+            color: var(--text-main);
+            overflow-x: hidden;
+        }
+
+        .hidden { display: none !important; }
+
+        /* Login Styles (Mantidos para consistência) */
+        .login-wrapper { display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 20px; }
+        .login-content { display: flex; max-width: 980px; width: 100%; justify-content: space-between; align-items: center; }
+        .login-brand { max-width: 500px; padding-right: 32px; }
+        .login-brand h1 { color: var(--primary-pink); font-size: 4rem; font-weight: bold; margin-bottom: 10px; }
+        .login-card { background: var(--white); padding: 20px; border-radius: 8px; box-shadow: 0 8px 16px rgba(0, 0, 0, .1); width: 396px; text-align: center; }
+        .login-card input { width: 100%; padding: 14px 16px; margin-bottom: 12px; border: 1px solid #dddfe2; border-radius: 6px; font-size: 17px; }
+        .login-btn { width: 100%; background-color: var(--primary-pink); color: white; border: none; border-radius: 6px; font-size: 20px; font-weight: bold; padding: 10px 0; cursor: pointer; }
+
+        /* Header Expandido */
+        .header {
+            background: var(--white);
+            height: 56px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 16px;
+            position: fixed;
+            top: 0;
+            width: 100%;
+            z-index: 1000;
+        }
+
+        .header-left h2 { color: var(--primary-pink); font-size: 2rem; cursor: pointer; }
+        
+        .search-bar {
+            background: #f0f2f5;
+            padding: 8px 12px;
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            margin-left: 10px;
+        }
+        .search-bar input { background: transparent; border: none; outline: none; margin-left: 5px; width: 200px; }
+
+        .header-center { display: flex; gap: 30px; }
+        .nav-icon { font-size: 1.5rem; color: var(--text-sub); cursor: pointer; padding: 10px 20px; border-radius: 8px; }
+        .nav-icon:hover { background: var(--hover-bg); }
+        .nav-icon.active { color: var(--primary-pink); border-bottom: 3px solid var(--primary-pink); border-radius: 0; }
+
+        /* Main Layout */
+        .main-grid {
+            display: grid;
+            grid-template-columns: 280px 1fr 280px;
+            margin-top: 56px;
+            height: calc(100vh - 56px);
+        }
+
+        /* Sidebars */
+        .sidebar { padding: 16px; overflow-y: auto; position: sticky; top: 56px; }
+        .sidebar-item {
+            display: flex;
+            align-items: center;
+            padding: 10px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .sidebar-item:hover { background: var(--hover-bg); }
+        .sidebar-icon {
+            width: 36px;
+            height: 36px;
+            background: var(--light-pink);
+            border-radius: 50%;
+            margin-right: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--dark-pink);
+            font-size: 1.2rem;
+        }
+
+        /* Stories */
+        .stories-container {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 16px;
+            overflow-x: auto;
+            padding-bottom: 10px;
+        }
+        .story-card {
+            min-width: 110px;
+            height: 200px;
+            background: #ddd;
+            border-radius: 10px;
+            position: relative;
+            cursor: pointer;
+            background-size: cover;
+            background-position: center;
+        }
+        .story-avatar {
+            position: absolute;
+            top: 8px;
+            left: 8px;
+            width: 32px;
+            height: 32px;
+            border: 3px solid var(--primary-pink);
+            border-radius: 50%;
+            background: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8rem;
+        }
+        .story-name {
+            position: absolute;
+            bottom: 8px;
+            left: 8px;
+            color: white;
+            font-weight: bold;
+            font-size: 13px;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+        }
+
+        /* Feed */
+        .feed-column { padding: 20px; max-width: 600px; margin: 0 auto; width: 100%; }
+        
+        .post-creator {
+            background: var(--white);
+            border-radius: 8px;
+            padding: 12px 16px;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+            margin-bottom: 16px;
+        }
+
+        .post-card {
+            background: var(--white);
+            border-radius: 8px;
+            padding: 12px 16px;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+            margin-bottom: 16px;
+        }
+
+        .post-actions {
+            display: flex;
+            justify-content: space-around;
+            border-top: 1px solid #eee;
+            border-bottom: 1px solid #eee;
+            padding: 4px 0;
+            margin: 10px 0;
+        }
+        .action-btn {
+            flex: 1;
+            padding: 8px;
+            text-align: center;
+            cursor: pointer;
+            border-radius: 4px;
+            color: var(--text-sub);
+            font-weight: bold;
+            font-size: 14px;
+        }
+        .action-btn:hover { background: var(--hover-bg); }
+        .action-btn.active { color: var(--primary-pink); }
+
+        .comments-section { padding-top: 10px; }
+        .comment { display: flex; gap: 8px; margin-bottom: 8px; }
+        .comment-bubble { background: #f0f2f5; padding: 8px 12px; border-radius: 18px; font-size: 13px; }
+
+        /* Responsividade */
+        @media (max-width: 1100px) { .main-grid { grid-template-columns: 80px 1fr 80px; } .sidebar-item span { display: none; } }
+        @media (max-width: 700px) { .main-grid { grid-template-columns: 1fr; } .sidebar { display: none; } }
+    </style>
+</head>
+<body>
+
+    <!-- LOGIN SCREEN -->
+    <div id="login-screen" class="login-wrapper">
+        <div class="login-content">
+            <div class="login-brand">
+                <h1>rafaface</h1>
+                <p>O RafaFace ajuda você a se conectar e compartilhar com apenas texto e emojis.</p>
+            </div>
+            <div class="login-card">
+                <input type="text" id="email" placeholder="E-mail ou telefone">
+                <input type="password" id="password" placeholder="Senha">
+                <button class="login-btn" onclick="handleLogin()">Entrar</button>
+                <div style="margin: 15px 0; border-bottom: 1px solid #dadde1;"></div>
+                <button class="login-btn" style="background: #42b72a; width: auto; padding: 10px 20px;">Criar nova conta</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- DASHBOARD -->
+    <div id="dashboard-screen" class="hidden">
+        <header class="header">
+            <div class="header-left" style="display: flex; align-items: center;">
+                <h2>rafaface</h2>
+                <div class="search-bar">
+                    <span>🔍</span>
+                    <input type="text" placeholder="Pesquisar no RafaFace">
+                </div>
+            </div>
+            <div class="header-center">
+                <div class="nav-icon active">🏠</div>
+                <div class="nav-icon">👥</div>
+                <div class="nav-icon">📺</div>
+                <div class="nav-icon">🏪</div>
+                <div class="nav-icon">🎮</div>
+            </div>
+            <div class="header-right" style="display: flex; gap: 10px;">
+                <div class="nav-icon" style="background: #e4e6e9; border-radius: 50%; padding: 8px;">🔔</div>
+                <div class="nav-icon" style="background: #e4e6e9; border-radius: 50%; padding: 8px;">💬</div>
+                <div class="nav-icon" onclick="handleLogout()" style="background: #e4e6e9; border-radius: 50%; padding: 8px;">👤</div>
+            </div>
+        </header>
+
+        <div class="main-grid">
+            <!-- Sidebar Esquerda -->
+            <aside class="sidebar">
+                <div class="sidebar-item">
+                    <div class="sidebar-icon" id="user-initial">R</div>
+                    <span id="user-name-side">Rafaela</span>
+                </div>
+                <div class="sidebar-item"><div class="sidebar-icon">👥</div><span>Amigos</span></div>
+                <div class="sidebar-item"><div class="sidebar-icon">👨‍👩‍👧‍👦</div><span>Grupos</span></div>
+                <div class="sidebar-item"><div class="sidebar-icon">🏪</div><span>Marketplace</span></div>
+                <div class="sidebar-item"><div class="sidebar-icon">📺</div><span>Watch</span></div>
+                <div class="sidebar-item"><div class="sidebar-icon">⏰</div><span>Lembranças</span></div>
+                <div class="sidebar-item"><div class="sidebar-icon">🔖</div><span>Salvos</span></div>
+                <div class="sidebar-item"><div class="sidebar-icon">🚩</div><span>Páginas</span></div>
+                <div class="sidebar-item"><div class="sidebar-icon">📅</div><span>Eventos</span></div>
+            </aside>
+
+            <!-- Feed Central -->
+            <main class="feed-column">
+                <!-- Stories -->
+                <div class="stories-container">
+                    <div class="story-card" style="background-image: linear-gradient(to bottom, var(--primary-pink), var(--dark-pink));">
+                        <div class="story-avatar">+</div>
+                        <div class="story-name">Criar Story</div>
+                    </div>
+                    <div class="story-card" style="background-color: #ffc1e3;">
+                        <div class="story-avatar">J</div>
+                        <div class="story-name">João Silva</div>
+                    </div>
+                    <div class="story-card" style="background-color: #d1c4e9;">
+                        <div class="story-avatar">M</div>
+                        <div class="story-name">Maria Clara</div>
+                    </div>
+                    <div class="story-card" style="background-color: #b3e5fc;">
+                        <div class="story-avatar">P</div>
+                        <div class="story-name">Pedro Henr..</div>
+                    </div>
+                </div>
+
+                <!-- Criador de Post -->
+                <div class="post-creator">
+                    <div style="display: flex; align-items: center; margin-bottom: 12px;">
+                        <div class="sidebar-icon" id="creator-initial">R</div>
+                        <div style="background: #f0f2f5; border-radius: 20px; padding: 10px 15px; flex: 1; cursor: pointer; color: #65676b;" onclick="focusPost()">
+                            No que você está pensando, <span id="user-first-name">Rafaela</span>?
+                        </div>
+                    </div>
+                    <div style="display: flex; justify-content: space-around; border-top: 1px solid #eee; padding-top: 10px;">
+                        <div style="color: #f3425f; font-weight: bold; cursor: pointer;">🎥 Vídeo ao vivo</div>
+                        <div style="color: #45bd62; font-weight: bold; cursor: pointer;">🖼️ Foto/vídeo</div>
+                        <div style="color: #f7b928; font-weight: bold; cursor: pointer;">😊 Sentimento/ativid..</div>
+                    </div>
+                    <div id="post-expanded" class="hidden" style="margin-top: 15px;">
+                        <textarea id="post-text" style="width: 100%; height: 100px; border: none; outline: none; font-size: 18px; resize: none;" placeholder="Escreva algo..."></textarea>
+                        <div style="display: flex; gap: 10px; margin-bottom: 10px; font-size: 1.5rem;">
+                            <span style="cursor:pointer" onclick="addEmoji('💖')">💖</span>
+                            <span style="cursor:pointer" onclick="addEmoji('✨')">✨</span>
+                            <span style="cursor:pointer" onclick="addEmoji('🌸')">🌸</span>
+                            <span style="cursor:pointer" onclick="addEmoji('🔥')">🔥</span>
+                        </div>
+                        <button class="login-btn" onclick="createPost()">Publicar</button>
+                    </div>
+                </div>
+
+                <!-- Feed -->
+                <div id="feed"></div>
+            </main>
+
+            <!-- Sidebar Direita -->
+            <aside class="sidebar">
+                <h4 style="color: var(--text-sub); margin-bottom: 15px;">Patrocinado</h4>
+                <div style="margin-bottom: 20px; font-size: 13px;">
+                    <p>✨ <b>Loja da Rafa</b></p>
+                    <p style="color: var(--text-sub)">Os melhores emojis rosa para seu perfil!</p>
+                </div>
+                <hr style="border: 0; border-top: 1px solid #ddd; margin-bottom: 15px;">
+                <h4 style="color: var(--text-sub); margin-bottom: 15px;">Contatos</h4>
+                <div class="sidebar-item">
+                    <div class="sidebar-icon" style="position: relative;">
+                        J
+                        <div style="position: absolute; bottom: 0; right: 0; width: 10px; height: 10px; background: #42b72a; border-radius: 50%; border: 2px solid white;"></div>
+                    </div>
+                    <span>João Silva</span>
+                </div>
+                <div class="sidebar-item">
+                    <div class="sidebar-icon" style="position: relative;">
+                        M
+                        <div style="position: absolute; bottom: 0; right: 0; width: 10px; height: 10px; background: #42b72a; border-radius: 50%; border: 2px solid white;"></div>
+                    </div>
+                    <span>Maria Clara</span>
+                </div>
+            </aside>
+        </div>
+    </div>
+
+    <script>
+        const ADMIN_EMAIL = "rafaela.areias.ferreira@escola.pr.gov.br";
+        const ADMIN_PASS = "101908";
+
+        let currentUser = null;
+        let posts = [
+            { id: 1, author: "Maria Clara", content: "Amei o novo RafaFace! Ficou tudo tão lindo e rosa! 💖🌸", likes: 12, comments: 3, date: "10 min" },
+            { id: 2, author: "João Silva", content: "Testando a nova rede social. Muito rápida! 🔥", likes: 5, comments: 1, date: "1 hora" }
+        ];
+
+        function handleLogin() {
+            const email = document.getElementById('email').value;
+            const pass = document.getElementById('password').value;
+            if (email === ADMIN_EMAIL && pass === ADMIN_PASS) {
+                currentUser = { name: "Rafaela Areias", initial: "R" };
+                initDashboard();
+            } else if (email && pass) {
+                const name = email.split('@')[0];
+                currentUser = { name: name, initial: name.charAt(0).toUpperCase() };
+                initDashboard();
+            }
+        }
+
+        function initDashboard() {
+            document.getElementById('login-screen').classList.add('hidden');
+            document.getElementById('dashboard-screen').classList.remove('hidden');
+            
+            document.getElementById('user-initial').innerText = currentUser.initial;
+            document.getElementById('creator-initial').innerText = currentUser.initial;
+            document.getElementById('user-name-side').innerText = currentUser.name;
+            document.getElementById('user-first-name').innerText = currentUser.name.split(' ')[0];
+            
+            renderPosts();
+        }
+
+        function handleLogout() {
+            location.reload();
+        }
+
+        function focusPost() {
+            document.getElementById('post-expanded').classList.toggle('hidden');
+        }
+
+        function addEmoji(emoji) {
+            document.getElementById('post-text').value += emoji;
+        }
+
+        function createPost() {
+            const text = document.getElementById('post-text').value;
+            if (!text.trim()) return;
+
+            posts.unshift({
+                id: Date.now(),
+                author: currentUser.name,
+                content: text,
+                likes: 0,
+                comments: 0,
+                date: "Agora"
+            });
+
+            document.getElementById('post-text').value = '';
+            document.getElementById('post-expanded').classList.add('hidden');
+            renderPosts();
+        }
+
+        function renderPosts() {
+            const feed = document.getElementById('feed');
+            feed.innerHTML = '';
+
+            posts.forEach(post => {
+                const div = document.createElement('div');
+                div.className = 'post-card';
+                div.innerHTML = `
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                        <div style="display: flex; align-items: center;">
+                            <div class="sidebar-icon">${post.author.charAt(0)}</div>
+                            <div>
+                                <div style="font-weight: bold;">${post.author}</div>
+                                <div style="font-size: 12px; color: #65676b;">${post.date} · 🌎</div>
+                            </div>
+                        </div>
+                        <div style="color: #65676b; cursor: pointer;">•••</div>
+                    </div>
+                    <div class="post-content">${post.content}</div>
+                    <div style="display: flex; justify-content: space-between; font-size: 14px; color: #65676b; padding: 5px 0;">
+                        <span>❤️ ${post.likes}</span>
+                        <span>${post.comments} comentários</span>
+                    </div>
+                    <div class="post-actions">
+                        <div class="action-btn" onclick="this.classList.toggle('active')">👍 Curtir</div>
+                        <div class="action-btn">💬 Comentar</div>
+                        <div class="action-btn">⤴️ Compartilhar</div>
+                    </div>
+                    <div class="comments-section">
+                        <div class="comment">
+                            <div class="sidebar-icon" style="width: 32px; height: 32px; font-size: 0.9rem;">R</div>
+                            <div class="comment-bubble">
+                                <b>RafaFace Bot</b><br>
+                                Que post legal! 😊
+                            </div>
+                        </div>
+                    </div>
+                `;
+                feed.appendChild(div);
+            });
+        }
+    </script>
+</body>
+</html>
